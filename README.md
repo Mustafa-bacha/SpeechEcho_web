@@ -1,6 +1,6 @@
-# SpeechEcho - Real-Time Voice Cloning & Conversational Synthesis
+# SpeechEcho — Real‑Time Voice Cloning & Conversational Synthesis
 
-A modern web application for voice cloning, text-to-speech synthesis, document voiceover, and AI-powered conversational interfaces.
+SpeechEcho is a full‑stack web application for voice cloning, text‑to‑speech synthesis, document voiceover, and AI‑powered conversational interfaces.
 
 ## 🎯 Features
 
@@ -38,6 +38,21 @@ SpeechEcho_web/
 ```
 
 ## 🚀 Getting Started
+
+### Quick Start (local)
+
+```bash
+cd backend
+uvicorn app.main:app --reload --port 8000
+```
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+App: `http://localhost:5173` • API: `http://localhost:8000/api/docs`
 
 ### Prerequisites
 
@@ -178,6 +193,10 @@ The frontend can work without the backend using:
 - Google Generative AI (optional)
 
 ## 📝 Notes
+
+### Repository Notes
+- Large model artifacts and virtual environments are excluded via `.gitignore`.
+- If you need Chatterbox models locally, place them under `chatterbox-streaming/` after cloning.
 
 ### Mock Implementation
 This is an MVP demo. The voice cloning feature uses random parameters instead of actual AI training. The real implementation would require:
