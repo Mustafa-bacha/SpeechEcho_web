@@ -20,6 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 venv/
+.venv/
 .env
 .env.*
 *.db
@@ -54,7 +55,16 @@ Thumbs.db
 .DS_Store
 
 # Workspace local artifacts
+chatterbox-streaming/
 chatterbox-streaming/chatterbox_venv/
 chatterbox-streaming/build/
 chatterbox-streaming/.venv/
-chatterbox-streaming/
+chatterbox-streaming/checkpoints_lora/
+chatterbox-streaming/models/
+chatterbox-streaming/audio_data/
+chatterbox-streaming/src/chatterbox_streaming.egg-info/
+chatterbox-streaming/**/__pycache__/
+
+# Root static artifacts
+static/audio/
+static/uploads/

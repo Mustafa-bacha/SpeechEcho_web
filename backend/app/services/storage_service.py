@@ -29,11 +29,7 @@ class StorageService:
 		self._supabase = None
 
 		if self.backend == "supabase" and create_client and settings.SUPABASE_URL and settings.SUPABASE_SERVICE_ROLE_KEY:
-			try:
-				self._supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
-			except Exception as e:
-				self._supabase = None
-				print(f"Warning: Supabase storage initialization failed, falling back to local storage. Error: {e}")
+			self._supabase = create_client(settings.SUPABASE_URL, settings.SUPABASE_SERVICE_ROLE_KEY)
 
 		os.makedirs(AUDIO_DIR, exist_ok=True)
 		os.makedirs(AVATARS_DIR, exist_ok=True)

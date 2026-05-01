@@ -12,7 +12,6 @@ import io
 from app.services.stt_service import stt_service
 from app.services.chat_service import chat_service
 from app.services.chatterbox_service import chatterbox_service
-from app.services.storage_service import storage_service
 from app.config import AUDIO_DIR, UPLOADS_DIR
 from app.database import SessionLocal
 from app.models.voice_profile import VoiceProfile
@@ -64,9 +63,13 @@ class VoiceChatService:
             db.close()
             
             if voice_profile and voice_profile.original_audio_path:
-                resolved = storage_service.resolve_to_local_path(voice_profile.original_audio_path)
-                if resolved and os.path.exists(resolved):
-                    return resolved
+                # Check if the file exists
+                if os.path.exists(voice_profile.original_audio_path):
+                    return voice_profile.original_audio_path
+                # Try with uploads directory prefix
+                full_path = os.path.join(UPLOADS_DIR, voice_profile.original_audio_path)
+                if os.path.exists(full_path):
+                    return full_path
                 print(f"Voice profile audio file not found: {voice_profile.original_audio_path}")
             return None
         except Exception as e:
@@ -394,8 +397,9 @@ class VoiceChatService:
                             )
                             
                             # Read the generated audio file and encode as base64
-                            audio_binary = storage_service.read_bytes(audio_url)
-                            audio_data = base64.b64encode(audio_binary).decode("utf-8")
+                            audio_file_path = audio_url.replace("/static/", "static/", 1)
+                            with open(audio_file_path, "rb") as f:
+                                audio_data = base64.b64encode(f.read()).decode("utf-8")
                             
                             yield {
                                 "type": "tts_chunk",
@@ -422,8 +426,9 @@ class VoiceChatService:
                         temperature=0.8
                     )
                     
-                    audio_binary = storage_service.read_bytes(audio_url)
-                    audio_data = base64.b64encode(audio_binary).decode("utf-8")
+                    audio_file_path = audio_url.replace("/static/", "static/", 1)
+                    with open(audio_file_path, "rb") as f:
+                        audio_data = base64.b64encode(f.read()).decode("utf-8")
                     
                     yield {
                         "type": "tts_chunk",

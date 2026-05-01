@@ -8,7 +8,6 @@ from typing import Optional, Tuple
 from pydub import AudioSegment
 
 from app.config import AUDIO_DIR
-from app.services.storage_service import storage_service
 
 
 class TTSService:
@@ -84,7 +83,7 @@ class TTSService:
                 # Cleanup temp file
                 os.remove(temp_path)
                 
-                return storage_service.audio_url_from_local_file(final_path), duration
+                return f"/static/audio/{filename}", duration
             else:
                 # If pyttsx3 fails, create a silent placeholder
                 return self._create_placeholder_audio(filename)
@@ -101,8 +100,8 @@ class TTSService:
         # Create 1 second of silence
         silence = AudioSegment.silent(duration=1000)
         silence.export(final_path, format="wav")
-
-        return storage_service.audio_url_from_local_file(final_path), 1.0
+        
+        return f"/static/audio/{filename}", 1.0
     
     def delete_audio(self, audio_url: str) -> bool:
         """Delete an audio file"""

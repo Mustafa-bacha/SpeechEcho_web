@@ -25,6 +25,7 @@ export function AuthProvider({ children }) {
       const response = await authService.login(username, password)
       const { access_token, user: userData } = response.data
       
+      localStorage.removeItem('guestMode')
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
       
@@ -46,6 +47,7 @@ export function AuthProvider({ children }) {
       const response = await authService.register(email, username, password, fullName)
       const { access_token, user: userData } = response.data
       
+      localStorage.removeItem('guestMode')
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
       
@@ -67,6 +69,7 @@ export function AuthProvider({ children }) {
       const response = await authService.googleAuth(credential)
       const { access_token, user: userData } = response.data
       
+      localStorage.removeItem('guestMode')
       localStorage.setItem('token', access_token)
       localStorage.setItem('user', JSON.stringify(userData))
       
@@ -83,9 +86,30 @@ export function AuthProvider({ children }) {
     }
   }
 
+  const guestLogin = () => {
+    const guestUser = {
+      id: 1,
+      email: 'guest@example.com',
+      username: 'guest',
+      full_name: 'Guest User',
+      is_active: true
+    }
+    const guestToken = 'guest-bypass-token'
+
+    localStorage.setItem('guestMode', 'true')
+    localStorage.setItem('token', guestToken)
+    localStorage.setItem('user', JSON.stringify(guestUser))
+
+    setToken(guestToken)
+    setUser(guestUser)
+
+    return { success: true }
+  }
+
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('guestMode')
     setToken(null)
     setUser(null)
   }
@@ -104,6 +128,7 @@ export function AuthProvider({ children }) {
     login,
     register,
     googleLogin,
+    guestLogin,
     logout,
     updateUser
   }

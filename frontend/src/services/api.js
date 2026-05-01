@@ -6,7 +6,11 @@ const normalizeApiBase = (raw) => {
   return value.endsWith('/') ? value.slice(0, -1) : value
 }
 
-const API_BASE = normalizeApiBase(import.meta.env.VITE_API_BASE_URL)
+const envBase = normalizeApiBase(import.meta.env.VITE_API_BASE_URL)
+const runtimeOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+const sameOriginBase = runtimeOrigin ? `${runtimeOrigin}/api` : '/api'
+const isPinggyHost = runtimeOrigin.includes('pinggy-free.link')
+const API_BASE = isPinggyHost ? sameOriginBase : (envBase || sameOriginBase)
 
 // Create axios instance
 const api = axios.create({
@@ -33,6 +37,11 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
+      const isGuest = localStorage.getItem('guestMode') === 'true'
+      const token = localStorage.getItem('token')
+      if (isGuest || token === 'guest-bypass-token') {
+        return Promise.reject(error)
+      }
       // Token expired or invalid
       localStorage.removeItem('token')
       localStorage.removeItem('user')

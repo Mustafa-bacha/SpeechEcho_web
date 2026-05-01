@@ -1,82 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AudioWaveform, Eye, EyeOff, Loader2 } from 'lucide-react'
 import { useAuth } from '../../contexts/AuthContext'
-import { authService } from '../../services/api'
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login, googleLogin } = useAuth()
+  const { login, guestLogin } = useAuth()
   const [formData, setFormData] = useState({ username: '', password: '' })
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false)
   const [error, setError] = useState('')
-  const [googleClientId, setGoogleClientId] = useState('')
-
-  // Load Google Sign-In script and get client ID
-  useEffect(() => {
-    const loadGoogleScript = async () => {
-      try {
-        // Get Google Client ID from backend
-        const response = await authService.getGoogleClientId()
-        const clientId = response.data.client_id
-        setGoogleClientId(clientId)
-
-        // Load Google Identity Services script
-        if (!document.getElementById('google-signin-script')) {
-          const script = document.createElement('script')
-          script.id = 'google-signin-script'
-          script.src = 'https://accounts.google.com/gsi/client'
-          script.async = true
-          script.defer = true
-          script.onload = () => initializeGoogleSignIn(clientId)
-          document.body.appendChild(script)
-        } else if (window.google) {
-          initializeGoogleSignIn(clientId)
-        }
-      } catch (err) {
-        console.log('Google OAuth not configured:', err)
-      }
-    }
-
-    loadGoogleScript()
-  }, [])
-
-  const initializeGoogleSignIn = (clientId) => {
-    if (window.google && clientId) {
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCallback,
-      })
-      
-      window.google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        { 
-          theme: 'outline', 
-          size: 'large', 
-          width: '100%',
-          text: 'signin_with',
-          shape: 'rectangular'
-        }
-      )
-    }
-  }
-
-  const handleGoogleCallback = async (response) => {
-    setIsGoogleLoading(true)
-    setError('')
-    
-    const result = await googleLogin(response.credential)
-    
-    if (result.success) {
-      navigate('/dashboard')
-    } else {
-      setError(result.error)
-    }
-    
-    setIsGoogleLoading(false)
-  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -92,6 +25,17 @@ export default function Login() {
     }
     
     setIsLoading(false)
+  }
+
+  const handleGuestLogin = () => {
+    setError('')
+    const result = guestLogin()
+
+    if (result.success) {
+      navigate('/dashboard')
+    } else {
+      setError(result.error || 'Guest login failed')
+    }
   }
 
   return (
@@ -190,27 +134,18 @@ export default function Login() {
               <div className="w-full border-t border-gray-200"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+              <span className="px-4 bg-white text-gray-500">Or continue as</span>
             </div>
           </div>
 
-          {/* Google Sign-In Button */}
-          <div className="flex justify-center">
-            {isGoogleLoading ? (
-              <div className="flex items-center justify-center gap-2 py-3 px-4 border border-gray-300 rounded-lg w-full">
-                <Loader2 className="w-5 h-5 animate-spin text-gray-500" />
-                <span className="text-gray-600">Signing in with Google...</span>
-              </div>
-            ) : (
-              <div id="google-signin-button" className="w-full flex justify-center"></div>
-            )}
-          </div>
-
-          {!googleClientId && (
-            <p className="text-xs text-gray-400 text-center mt-3">
-              Google Sign-In not configured
-            </p>
-          )}
+          {/* Guest Sign-In Button */}
+          <button
+            type="button"
+            onClick={handleGuestLogin}
+            className="w-full btn-secondary flex items-center justify-center gap-2 py-3"
+          >
+            Login as Guest
+          </button>
 
           <div className="mt-6 text-center">
             <p className="text-gray-500">
@@ -225,7 +160,7 @@ export default function Login() {
         {/* Demo credentials */}
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-400">
-            Demo: Create a new account or sign in with Google
+            Demo: Create a new account or sign in as guest
           </p>
         </div>
       </div>
